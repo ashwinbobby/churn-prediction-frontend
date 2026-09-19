@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import { useRouter } from "next/navigation"; // 1. Import useRouter
 
 interface CustomerFormData {
   gender: string;
@@ -25,6 +26,8 @@ interface CustomerFormData {
 }
 
 export default function CustomerForm() {
+  const router = useRouter(); // 2. Initialize router hook
+
   const [formData, setFormData] = useState<CustomerFormData>({
     gender: "Male",
     SeniorCitizen: 0,
@@ -75,18 +78,27 @@ export default function CustomerForm() {
     console.log("Sending JSON to backend:", jsonPayload);
 
     try {
-      const response = await fetch("http://0.0.0.0:8000/predict", {
+      const response = await fetch("https://churn-prediction-bic9.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: jsonPayload,
       });
+
       if (!response.ok) throw new Error("Network response was not ok");
       const result = await response.json();
       console.log("Success:", result);
 
-      alert("Form submitted successfully! Check console for JSON output.");
+      // 3. Extract your backend response values.
+      // (Adjust `result.prediction` or `result.churn` based on how your FastAPI backend structures its JSON return format)
+      const predictionValue = result.churn_prediction ?? result.churn_prediction ?? "Yes"; 
+      const probabilityValue = result.churn_probability ?? "";
+
+      // 4. Redirect to the result page with query parameters
+      router.push(`/result?prediction=${encodeURIComponent(predictionValue)}&probability=${encodeURIComponent(probabilityValue)}`);
+      
     } catch (error) {
       console.error("Error sending data to backend:", error);
+      alert("Failed to connect to the prediction backend.");
     }
   };
 
@@ -279,7 +291,6 @@ export default function CustomerForm() {
         </p>
       </div>
 
-      {/* 3-Column Grid Layout for Desktop, 2-column for Tablet, 1-column for Mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {formFields.map((field) => (
           <div key={field.name} className="flex flex-col gap-1.5">
