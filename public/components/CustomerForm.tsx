@@ -2,6 +2,7 @@
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation"; // 1. Import useRouter
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface CustomerFormData {
   gender: string;
@@ -78,7 +79,7 @@ export default function CustomerForm() {
     console.log("Sending JSON to backend:", jsonPayload);
 
     try {
-      const response = await fetch("https://churn-prediction-bic9.onrender.com/predict", {
+      const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: jsonPayload,
