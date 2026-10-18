@@ -72,35 +72,12 @@ export default function CustomerForm() {
     }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const jsonPayload = JSON.stringify(formData, null, 2);
-    console.log("Sending JSON to backend:", jsonPayload);
-
-    try {
-      const response = await fetch(`${API_URL}/predict`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: jsonPayload,
-      });
-
-      if (!response.ok) throw new Error("Network response was not ok");
-      const result = await response.json();
-      console.log("Success:", result);
-
-      // 3. Extract your backend response values.
-      // (Adjust `result.prediction` or `result.churn` based on how your FastAPI backend structures its JSON return format)
-      const predictionValue = result.churn_prediction ?? result.churn_prediction ?? "Yes"; 
-      const probabilityValue = result.churn_probability ?? "";
-
-      // 4. Redirect to the result page with query parameters
-      router.push(`/result?prediction=${encodeURIComponent(predictionValue)}&probability=${encodeURIComponent(probabilityValue)}`);
-      
-    } catch (error) {
-      console.error("Error sending data to backend:", error);
-      alert("Failed to connect to the prediction backend.");
-    }
+    const params = new URLSearchParams(
+      Object.entries(formData).map(([k, v]) => [k, String(v)]),
+    );
+    router.push(`/result?${params.toString()}`);
   };
 
   const formFields = [
